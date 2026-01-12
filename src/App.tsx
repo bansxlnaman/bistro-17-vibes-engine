@@ -11,6 +11,8 @@ import Order from "./pages/Order";
 import About from "./pages/About";
 import Kitchen from "./pages/Kitchen";
 import QRCodes from "./pages/QRCodes";
+import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/kitchen" element={<Kitchen />} />
             <Route path="/qr-codes" element={<QRCodes />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -68,6 +68,16 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Staff</h4>
             <ul className="space-y-2 text-primary-foreground/80">
               <li>
+                <Link to="/auth" className="hover:text-primary-foreground transition-colors">
+                  Staff Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin" className="hover:text-primary-foreground transition-colors">
+                  Admin Panel
+                </Link>
+              </li>
+              <li>
                 <Link to="/kitchen" className="hover:text-primary-foreground transition-colors">
                   Kitchen Display
                 </Link>
