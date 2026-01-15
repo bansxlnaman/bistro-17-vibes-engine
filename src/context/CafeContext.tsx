@@ -63,31 +63,37 @@ export const CafeProvider = ({ children }: CafeProviderProps) => {
     setError(null);
 
     try {
-      // Get current domain (for multi-tenant resolution)
-      const currentDomain = window.location.hostname;
+      // Define hostname and isDevelopment
+      const hostname = window.location.hostname;
+      const isDevelopment =
+        hostname === "localhost" || hostname.endsWith(".vercel.app");
+
+      console.log("Hostname:", hostname);
+      console.log("isDevelopment:", isDevelopment);
+
       let cafeData = null;
 
       // Try to find cafe by domain
-      const { data, error: fetchError } = await supabase
-        .from('cafes')
-        .select('*')
-        .eq('domain', currentDomain)
-        .maybeSingle();
+      const query = isDevelopment
+        ? supabase
+            .from('cafes')
+            .select('*')
+            .order('created_at', { ascending: true })
+            .limit(1)
+            .maybeSingle()
+        : supabase
+            .from('cafes')
+            .select('*')
+            .eq('domain', hostname)
+            .maybeSingle();
 
-      // If no match by exact domain, try preview/localhost fallback
-      if (!data) {
-        // For development/preview, get the first cafe or create default
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('cafes')
-          .select('*')
-          .limit(1)
-          .maybeSingle();
+      const { data, error: fetchError } = await query;
 
-        if (fallbackError) throw fallbackError;
-        cafeData = fallbackData;
-      } else {
-        cafeData = data;
+      if (fetchError) {
+        throw fetchError;
       }
+
+      cafeData = data;
 
       if (cafeData) {
         // Parse theme JSON safely
