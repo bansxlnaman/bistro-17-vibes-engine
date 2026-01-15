@@ -1,0 +1,92 @@
+import { useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { useCafe } from '@/context/CafeContext';
+
+export interface AuthState {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  isAdmin: boolean;
+  isStaff: boolean;
+  cafeId: string | null;
+}
+
+export const useCafeAuth = () => {
+  const { cafe } = useCafe();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
+  const [cafeId, setCafeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Defer role checking with setTimeout
+        if (session?.user && cafe?.id) {
+          setTimeout(() => {
+            checkUserRoles(session.user.id, cafe.id);
+          }, 0);
+        } else {
+          setIsAdmin(false);
+          setIsStaff(false);
+          setCafeId(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user && cafe?.id) {
+        checkUserRoles(session.user.id, cafe.id);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [cafe?.id]);
+
+  const checkUserRoles = async (userId: string, currentCafeId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role, cafe_id')
+        .eq('user_id', userId)
+        .eq('cafe_id', currentCafeId);
+
+      if (error) {
+        console.error('Error checking roles:', error);
+        return;
+      }
+
+      const roles = data?.map(r => r.role) || [];
+      setIsAdmin(roles.includes('admin'));
+      setIsStaff(roles.includes('staff') || roles.includes('admin'));
+      setCafeId(data?.[0]?.cafe_id || null);
+    } catch (error) {
+      console.error('Error checking roles:', error);
+    }
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
+
+  return {
+    user,
+    session,
+    loading,
+    isAdmin,
+    isStaff,
+    cafeId,
+    signOut,
+  };
+};

@@ -1,16 +1,19 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Star, Leaf, Music, BookOpen, Coffee } from 'lucide-react';
+import { useCafe } from '@/context/CafeContext';
 import heroImage from '@/assets/hero-cafe.jpg';
 
 const HeroSection = () => {
+  const { cafe, loading } = useCafe();
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
           src={heroImage}
-          alt="Bistro@17 cozy café interior"
+          alt={cafe?.name ? `${cafe.name} café interior` : 'Café interior'}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
@@ -33,13 +36,16 @@ const HeroSection = () => {
             {/* Headline */}
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-foreground leading-tight">
-                Your Own
-                <br />
-                <span className="text-primary">Cozy Corner</span>
+                {cafe?.tagline || (
+                  <>
+                    Your Own
+                    <br />
+                    <span className="text-primary">Cozy Corner</span>
+                  </>
+                )}
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-md font-sans">
-                Sip • Chill • Repeat — Where good coffee meets better vibes. 
-                Your perfect escape in the heart of Kurukshetra.
+                {cafe?.description || 'Where good coffee meets better vibes. Your perfect escape.'}
               </p>
             </div>
 

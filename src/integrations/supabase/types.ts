@@ -14,9 +14,106 @@ export type Database = {
   }
   public: {
     Tables: {
+      cafes: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          description: string | null
+          domain: string
+          facebook_url: string | null
+          google_maps_url: string | null
+          id: string
+          instagram_url: string | null
+          logo_url: string | null
+          name: string
+          opening_hours: string | null
+          phone: string | null
+          tagline: string | null
+          theme: Json | null
+          updated_at: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          description?: string | null
+          domain: string
+          facebook_url?: string | null
+          google_maps_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          logo_url?: string | null
+          name: string
+          opening_hours?: string | null
+          phone?: string | null
+          tagline?: string | null
+          theme?: Json | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          description?: string | null
+          domain?: string
+          facebook_url?: string | null
+          google_maps_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          logo_url?: string | null
+          name?: string
+          opening_hours?: string | null
+          phone?: string | null
+          tagline?: string | null
+          theme?: Json | null
+          updated_at?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          cafe_id: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          cafe_id: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          cafe_id?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_cafe_id_fkey"
+            columns: ["cafe_id"]
+            isOneToOne: false
+            referencedRelation: "cafes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_items: {
         Row: {
+          cafe_id: string | null
           category: string
+          category_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -29,7 +126,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cafe_id?: string | null
           category: string
+          category_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -42,7 +141,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cafe_id?: string | null
           category?: string
+          category_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -54,14 +155,32 @@ export type Database = {
           price?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_cafe_id_fkey"
+            columns: ["cafe_id"]
+            isOneToOne: false
+            referencedRelation: "cafes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orders: {
         Row: {
+          cafe_id: string | null
           created_at: string
           customer_phone: string | null
           id: string
           items: Json
+          order_date: string | null
+          order_number: number | null
           special_instructions: string | null
           status: string
           table_number: string
@@ -69,10 +188,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cafe_id?: string | null
           created_at?: string
           customer_phone?: string | null
           id?: string
           items: Json
+          order_date?: string | null
+          order_number?: number | null
           special_instructions?: string | null
           status?: string
           table_number: string
@@ -80,17 +202,28 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cafe_id?: string | null
           created_at?: string
           customer_phone?: string | null
           id?: string
           items?: Json
+          order_date?: string | null
+          order_number?: number | null
           special_instructions?: string | null
           status?: string
           table_number?: string
           total_amount?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_cafe_id_fkey"
+            columns: ["cafe_id"]
+            isOneToOne: false
+            referencedRelation: "cafes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -118,6 +251,7 @@ export type Database = {
       }
       tables: {
         Row: {
+          cafe_id: string | null
           created_at: string
           id: string
           is_active: boolean
@@ -125,6 +259,7 @@ export type Database = {
           table_number: string
         }
         Insert: {
+          cafe_id?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
@@ -132,34 +267,54 @@ export type Database = {
           table_number: string
         }
         Update: {
+          cafe_id?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
           qr_code_url?: string | null
           table_number?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tables_cafe_id_fkey"
+            columns: ["cafe_id"]
+            isOneToOne: false
+            referencedRelation: "cafes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
+          cafe_id: string | null
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          cafe_id?: string | null
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          cafe_id?: string | null
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_cafe_id_fkey"
+            columns: ["cafe_id"]
+            isOneToOne: false
+            referencedRelation: "cafes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
