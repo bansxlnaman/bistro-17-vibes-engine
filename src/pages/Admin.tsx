@@ -71,7 +71,7 @@ interface DailySales {
 const Admin = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, isAdmin, signOut } = useAuth();
-  const { cafe } = useCafe();
+  const { cafe, loading: cafeLoading } = useCafe();
   const { data: categories = [] } = useCategories();
   const { data: menuItems = [] } = useMenuItems();
   const { data: tables = [] } = useTables();
@@ -97,49 +97,67 @@ const Admin = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Set loading to false once auth and cafe are loaded
   useEffect(() => {
-    if (user) {
+    if (!authLoading && !cafeLoading) {
+      setLoading(false);
+    }
+  }, [authLoading, cafeLoading]);
+
+  // Fetch data once cafe is available
+  useEffect(() => {
+    if (user && cafe?.id && !authLoading && !cafeLoading) {
       fetchDailySales();
       fetchTodayStats();
     }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, cafe?.id, authLoading, cafeLoading]);
 
   const fetchDailySales = async () => {
-    if (!cafe?.id) return;
-    
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const { data, error } = await supabase
-      .from('orders')
-      .select('created_at, total_amount')
-      .eq('cafe_id', cafe.id)
-      .gte('created_at', sevenDaysAgo.toISOString())
-      .in('status', ['ready', 'served']);
-
-    if (error) {
-      console.error('Error fetching sales:', error);
+    if (!cafe?.id) {
+      setDailySales([]);
       return;
     }
+    
+    try {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    // Group by date
-    const salesByDate: Record<string, { orders: number; revenue: number }> = {};
-    data?.forEach(order => {
-      const date = new Date(order.created_at).toLocaleDateString('en-IN');
-      if (!salesByDate[date]) {
-        salesByDate[date] = { orders: 0, revenue: 0 };
+      const { data, error } = await supabase
+        .from('orders')
+        .select('created_at, total_amount')
+        .eq('cafe_id', cafe.id)
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .in('status', ['ready', 'served']);
+
+      if (error) {
+        console.error('Error fetching sales:', error);
+        setDailySales([]);
+        return;
       }
-      salesByDate[date].orders++;
-      salesByDate[date].revenue += Number(order.total_amount);
-    });
 
-    const salesArray = Object.entries(salesByDate).map(([date, stats]) => ({
-      date,
-      total_orders: stats.orders,
-      total_revenue: stats.revenue,
-    }));
+      // Group by date
+      const salesByDate: Record<string, { orders: number; revenue: number }> = {};
+      data?.forEach(order => {
+        const date = new Date(order.created_at).toLocaleDateString('en-IN');
+        if (!salesByDate[date]) {
+          salesByDate[date] = { orders: 0, revenue: 0 };
+        }
+        salesByDate[date].orders++;
+        salesByDate[date].revenue += Number(order.total_amount);
+      });
 
-    setDailySales(salesArray);
+      const salesArray = Object.entries(salesByDate).map(([date, stats]) => ({
+        date,
+        total_orders: stats.orders,
+        total_revenue: stats.revenue,
+      }));
+
+      setDailySales(salesArray);
+    } catch (error) {
+      console.error('Error fetching daily sales:', error);
+      setDailySales([]);
+    }
   };
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
@@ -172,24 +190,40 @@ const Admin = () => {
   };
 
   const fetchTodayStats = async () => {
-    if (!cafe?.id) return;
+    if (!cafe?.id) {
+      setTodayStats({ orders: 0, revenue: 0, avgOrder: 0 });
+      return;
+    }
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    const { data, error } = await supabase
-      .from('orders')
-      .select('total_amount')
-      .eq('cafe_id', cafe.id)
-      .gte('created_at', today.toISOString());
+      const { data, error } = await supabase
+        .from('orders')
+        .select('total_amount')
+        .eq('cafe_id', cafe.id)
+        .gte('created_at', today.toISOString());
 
-    if (!error && data) {
-      const revenue = data.reduce((sum, order) => sum + Number(order.total_amount), 0);
-      setTodayStats({
-        orders: data.length,
-        revenue,
-        avgOrder: data.length > 0 ? Math.round(revenue / data.length) : 0,
-      });
+      if (error) {
+        console.error('Error fetching today stats:', error);
+        setTodayStats({ orders: 0, revenue: 0, avgOrder: 0 });
+        return;
+      }
+
+      if (data) {
+        const revenue = data.reduce((sum, order) => sum + Number(order.total_amount), 0);
+        setTodayStats({
+          orders: data.length,
+          revenue,
+          avgOrder: data.length > 0 ? Math.round(revenue / data.length) : 0,
+        });
+      } else {
+        setTodayStats({ orders: 0, revenue: 0, avgOrder: 0 });
+      }
+    } catch (error) {
+      console.error('Error fetching today stats:', error);
+      setTodayStats({ orders: 0, revenue: 0, avgOrder: 0 });
     }
   };
 
@@ -383,7 +417,7 @@ const Admin = () => {
     navigate('/');
   };
 
-  if (authLoading || loading) {
+  if (authLoading || cafeLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/30">
         <div className="text-center">
