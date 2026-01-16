@@ -9,11 +9,17 @@ import { cn } from '@/lib/utils';
 import { Coffee } from 'lucide-react';
 
 const Menu = () => {
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [], isLoading: catLoading } = useCategories();
   const { data: menuItems, isLoading, error } = useMenuItems();
-  const [activeCategory, setActiveCategory] = useState(categories[0]?.id || '');
+  const [activeCategory, setActiveCategory] = useState<string>('');
 
-  const items = menuItems ? getItemsByCategory(menuItems, activeCategory) : [];
+  // Set first category as active when categories load
+  const firstCategoryId = categories[0]?.id;
+  if (!activeCategory && firstCategoryId) {
+    setActiveCategory(firstCategoryId);
+  }
+
+  const items = menuItems && activeCategory ? getItemsByCategory(menuItems, activeCategory) : [];
 
   return (
     <div className="min-h-screen bg-background">

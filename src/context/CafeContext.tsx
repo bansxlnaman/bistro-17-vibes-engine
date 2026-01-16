@@ -66,10 +66,11 @@ export const CafeProvider = ({ children }: CafeProviderProps) => {
       // Define hostname and isDevelopment
       const hostname = window.location.hostname;
       const isDevelopment =
-        hostname === "localhost" || hostname.endsWith(".vercel.app");
+        hostname === "localhost" || 
+        hostname.endsWith(".vercel.app") ||
+        hostname.endsWith(".lovable.app");
 
-      console.log("Hostname:", hostname);
-      console.log("isDevelopment:", isDevelopment);
+      console.log("Hostname:", hostname, "isDevelopment:", isDevelopment);
 
       let cafeData = null;
 

@@ -36,7 +36,15 @@ const HeroSection = () => {
             {/* Headline */}
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-foreground leading-tight">
-                {cafe?.tagline || (
+                {loading ? (
+                  <span className="animate-pulse bg-muted rounded w-64 h-16 block" />
+                ) : cafe?.tagline ? (
+                  <>
+                    {cafe.tagline.split('.')[0]}
+                    <br />
+                    <span className="text-primary">{cafe.tagline.split('.')[1] || ''}</span>
+                  </>
+                ) : (
                   <>
                     Your Own
                     <br />
@@ -45,7 +53,11 @@ const HeroSection = () => {
                 )}
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-md font-sans">
-                {cafe?.description || 'Where good coffee meets better vibes. Your perfect escape.'}
+                {loading ? (
+                  <span className="animate-pulse bg-muted rounded w-48 h-6 block" />
+                ) : (
+                  cafe?.description || 'Where good coffee meets better vibes. Your perfect escape.'
+                )}
               </p>
             </div>
 
