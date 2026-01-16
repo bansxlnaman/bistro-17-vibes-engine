@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Plus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getPopularItems } from '@/lib/menuData';
+import { useMenuItems, getPopularItems } from '@/hooks/useMenuItems';
 import { useCart } from '@/context/CartContext';
 import cappuccino from '@/assets/cappuccino.jpg';
 import fries from '@/assets/peri-peri-fries.jpg';
@@ -16,8 +16,25 @@ const imageMap: Record<string, string> = {
 };
 
 const FeaturedMenu = () => {
-  const popularItems = getPopularItems().slice(0, 4);
+  const { data: menuItems = [], isLoading } = useMenuItems();
+  const popularItems = getPopularItems(menuItems).slice(0, 4);
   const { addItem } = useCart();
+
+  if (isLoading) {
+    return (
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="animate-pulse">Loading featured items...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (popularItems.length === 0) {
+    return null; // Don't show section if no popular items
+  }
 
   return (
     <section className="py-20 bg-muted/30">
@@ -46,7 +63,7 @@ const FeaturedMenu = () => {
               {/* Image */}
               <div className="relative h-48 overflow-hidden">
                 <img
-                  src={imageMap[item.id] || cappuccino}
+                  src={item.image || imageMap[item.id] || cappuccino}
                   alt={item.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />

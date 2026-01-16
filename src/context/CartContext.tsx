@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { MenuItem } from '@/lib/menuData';
+import { MenuItem } from '@/hooks/useMenuItems';
 
-export interface CartItem extends MenuItem {
+export interface CartItem extends Omit<MenuItem, 'isAvailable'> {
   quantity: number;
 }
 
@@ -34,7 +34,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      // Convert MenuItem to CartItem
+      const cartItem: CartItem = {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        description: item.description,
+        isVeg: item.isVeg,
+        category_id: item.category_id,
+        category_name: item.category_name,
+        image: item.image,
+        isPopular: item.isPopular,
+        quantity: 1
+      };
+      return [...prev, cartItem];
     });
   };
 
