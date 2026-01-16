@@ -71,16 +71,16 @@ export const useOrderTracking = (orderNumberOrId: string | null) => {
 
     fetchOrder();
 
-    // Subscribe to realtime updates
+    // Subscribe to realtime updates (use order.id if found)
+    const subscriptionId = order?.id || orderNumberOrId;
     const channel = supabase
-      .channel(`order-${orderId}`)
+      .channel(`order-${subscriptionId}`)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
           table: 'orders',
-          filter: `id=eq.${orderId}`,
         },
         (payload) => {
           const newData = payload.new as any;
