@@ -8,7 +8,7 @@ import { CartProvider } from "@/context/CartContext";
 import { CafeProvider } from "@/context/CafeContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import Index from "./pages/Index";
+import TenantRouter from "@/components/TenantRouter";
 import Menu from "./pages/Menu";
 import Cart from "./pages/Cart";
 import Order from "./pages/Order";
@@ -34,7 +34,7 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   {/* Public Routes */}
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={<TenantRouter />} />
                   <Route path="/menu" element={<Menu />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/order" element={<Order />} />
